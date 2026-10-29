@@ -6,23 +6,23 @@ import { useAuth } from '../context/AuthContext';
 const money = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
 
 // Menampilkan ringkasan rekening, harga emas, dan aktivitas terbaru user.
-export default function DashboardPage({ onNavigate }) {
-  const { user, updateUser } = useAuth();
-  const [visible, setVisible] = useState(true); const [copied, setCopied] = useState(false);
+export default function DashboardPage({ onNavigate, guest = false, demoUser, tourStep = -1 }) {
+  const { user, updateUser } = useAuth(); const activeUser = guest ? demoUser : user;
+  const [visible, setVisible] = useState(false); const [copied, setCopied] = useState(false);
   const [transactions, setTransactions] = useState([]); const [gold, setGold] = useState(null);
   const [showTopup, setShowTopup] = useState(false); const [amount, setAmount] = useState(''); const [status, setStatus] = useState({}); const [busy, setBusy] = useState(false);
   const formatAmount = value => value ? Number(value).toLocaleString('id-ID') : '';
 
   useEffect(() => {
-    api.get('/transactions').then(({ data }) => setTransactions((data.data || []).slice(0, 3))).catch(() => setTransactions([]));
+    if (guest) { setTransactions([]); return; } api.get('/transactions').then(({ data }) => setTransactions((data.data || []).slice(0, 3))).catch(() => setTransactions([]));
     api.get('/portofolio').then(({ data }) => setGold(data.gold)).catch(() => setGold(null));
-  }, [user?.balance]);
+  }, [user?.balance, guest]);
 
   async function copyAccountNumber() { if (!user?.accountNumber) return; await navigator.clipboard.writeText(user.accountNumber); setCopied(true); setTimeout(() => setCopied(false), 1800); }
   async function submitTopup(event) { event.preventDefault(); setBusy(true); setStatus({}); try { const { data } = await api.post('/topup', { amount: Number(amount) }); updateUser(data.user); setStatus({ ok: 'Top up berhasil ditambahkan ke saldo.' }); setAmount(''); } catch (error) { setStatus({ error: error.response?.data?.message || 'Top up gagal.' }); } finally { setBusy(false); } }
 
   return <div className="space-y-5 pt-4">
-    <div><p className="text-sm text-slate-500">Selamat pagi,</p><h1 className="text-2xl font-bold text-[#102f5c]">{user?.name || 'Nasabah'} 👋</h1></div>
+    <div><p className="text-sm text-slate-500">{guest ? 'Selamat datang di demo,' : 'Selamat pagi,'}</p><h1 className="text-2xl font-bold text-[#102f5c]">{activeUser?.name || 'Nasabah'} 👋</h1></div>
     <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#ff7a00] to-[#ff9d2e] p-6 text-white shadow-xl shadow-orange-100"><div className="absolute -right-12 -top-14 h-44 w-44 rounded-full border-[28px] border-white/20" /><div className="relative"><div className="flex items-center justify-between"><span className="text-xs text-white/80">Saldo utama</span><button onClick={() => setVisible(!visible)}>{visible ? <Eye size={17} /> : <EyeOff size={17} />}</button></div><p className="mt-2 text-2xl font-bold tracking-tight">{visible ? money.format(user?.balance || 0) : '••••••••'}</p><div className="mt-7 flex items-end justify-between"><div><p className="text-[10px] text-white/70">Nomor rekening</p><div className="mt-1 flex items-center gap-2"><p className="font-mono text-sm tracking-wider">{user?.accountNumber || '-'}</p><button type="button" onClick={copyAccountNumber} title="Salin nomor rekening" className="rounded-lg bg-white/15 p-1.5 text-white transition hover:bg-white/25">{copied ? <Check size={14} /> : <Copy size={14} />}</button><span className={`text-[10px] transition-opacity ${copied ? 'opacity-100' : 'opacity-0'}`}>Tersalin</span></div></div><Landmark className="text-[#efff5a]" size={28} /></div></div></div>
     <div className="grid grid-cols-3 gap-3"><button onClick={() => onNavigate('transfer')} className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-xs font-semibold text-[#102f5c] shadow-sm"><Send size={19} className="text-[#0badae]" />Transfer</button><button onClick={() => { setShowTopup(true); setStatus({}); }} className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-xs font-semibold text-[#102f5c] shadow-sm"><Plus size={19} className="text-[#ff7a00]" />Top up</button><button onClick={() => onNavigate('investasi')} className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-xs font-semibold text-[#102f5c] shadow-sm"><Landmark size={19} className="text-[#8f70d8]" />Portofolio</button></div>
     <div className="rounded-2xl border border-orange-100 bg-[#fff3e5] p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-slate-500">Harga emas 24K</p><p className="mt-1 text-lg font-bold text-[#102f5c]">{gold ? money.format(gold.pricePerGram) : 'Memuat...'}</p><p className="mt-1 text-[10px] text-slate-500">per gram · {gold?.source || 'API emas'}</p></div><div className="rounded-xl bg-[#efff5a] p-3 text-[#102f5c]"><ArrowUpRight size={20} /></div></div></div>
