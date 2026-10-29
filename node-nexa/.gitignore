@@ -4,7 +4,7 @@ atlas-credentials.env
 npm-debug.log*
 
 # Legacy EJS/MySQL implementation, replaced by backend/ and frontend/
-server.js
+/server.js
 database.sql
 public/
 views/
