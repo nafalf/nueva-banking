@@ -6,7 +6,5 @@ npm-debug.log*
 # Legacy EJS/MySQL implementation, replaced by backend/ and frontend/
 server.js
 database.sql
-package.json
-package-lock.json
 public/
 views/
