@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { getBalance, getTransactions, topup, transfer } from '../controllers/bankController.js';
+import { protect } from '../middleware/auth.js';
+const router = Router();
+router.use(protect);
+router.get('/balance', getBalance);
+router.get('/transactions', getTransactions);
+router.post('/transfer', transfer);
+router.post('/topup', topup);
+export default router;

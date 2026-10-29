@@ -1,0 +1,47 @@
+# Environment dan secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+**/atlas-credentials.env
+
+# Dependencies dan hasil build
+**/node_modules/
+**/dist/
+**/build/
+**/.vite/
+*.log
+npm-debug.log*
+
+# Cache / temporary files
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+.phpunit.result.cache
+.phpunit.cache/
+
+# Legacy project folders yang tidak menjadi source Nueva MERN
+/app/
+/bootstrap/
+/config/
+/database/
+/public/
+/resources/
+/routes/
+/storage/
+/tests/
+/vendor/
+/php-nexa/
+/nexa_scaffold/
+/_nexa/
+/.github/
+
+# Local IDE files
+.idea/
+.vscode/
+.fleet/
+.nova/
+.zed/
